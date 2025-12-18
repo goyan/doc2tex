@@ -45,6 +45,9 @@ build = [
 visual = [
     "pymupdf>=1.24",
 ]
+all = [
+    "docx2latex[dev,build,visual]",
+]
 
 [project.scripts]
 docx2latex = "docx2latex.presentation.cli:main"

@@ -22,7 +22,26 @@ Or install from source:
 ```bash
 git clone https://github.com/user/docx2latex
 cd docx2latex
-pip install -e .
+
+# Windows
+setup.bat
+
+# Linux/macOS
+chmod +x setup.sh && ./setup.sh
+```
+
+This creates a virtual environment and installs all dependencies.
+
+**Manual setup:**
+
+```bash
+# Create and activate venv
+python -m venv venv
+venv\Scripts\activate      # Windows
+source venv/bin/activate   # Linux/macOS
+
+# Install
+pip install -e ".[dev]"
 ```
 
 ## Usage
@@ -115,20 +134,17 @@ The converter supports comprehensive math formula conversion:
 ## Development
 
 ```bash
-# Install dev dependencies
-pip install -e ".[dev]"
-
 # Run tests
-pytest
+python -m pytest
 
 # Run Pandoc compatibility tests (requires pdflatex)
 python run_pandoc_tests.py --clean
 
 # Type checking
-mypy src/
+python -m mypy src/
 
 # Linting
-ruff check src/
+python -m ruff check src/
 ```
 
 ### CJK Support

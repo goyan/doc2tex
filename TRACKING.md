@@ -115,6 +115,8 @@
 |------|--------|
 | PyInstaller script | ✅ Done |
 | README | ✅ Done |
+| setup.bat (Windows) | ✅ Done |
+| setup.sh (Linux/macOS) | ✅ Done |
 
 ---
 
@@ -140,6 +142,8 @@
 ## Files Created
 
 ```
+setup.bat                                ✅
+setup.sh                                 ✅
 src/docx2latex/
 ├── __init__.py                          ✅
 ├── shared/
@@ -213,8 +217,9 @@ src/docx2latex/
 ## Usage
 
 ```bash
-# Install
-pip install -e ".[dev]"
+# Setup (creates venv + installs dependencies)
+setup.bat          # Windows
+./setup.sh         # Linux/macOS
 
 # Convert document
 docx2latex convert document.docx
@@ -223,7 +228,7 @@ docx2latex convert document.docx
 docx2latex info document.docx
 
 # Run tests
-pytest tests/ -v
+python -m pytest
 
 # Build executable
 python scripts/build.py
