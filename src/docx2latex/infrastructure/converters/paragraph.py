@@ -138,9 +138,6 @@ class ParagraphConverter(BaseConverter[Paragraph]):
         self, element: Paragraph, context: ConversionContext
     ) -> Result[str, str]:
         """Convert a heading paragraph."""
-        level = element.get_heading_level()
-        cmd = element.style.to_latex_heading_cmd()
-
         # Get heading text
         text_parts = []
         for item in element.content:
@@ -152,6 +149,15 @@ class ParagraphConverter(BaseConverter[Paragraph]):
 
         text = "".join(text_parts).strip()
 
+        # Skip empty headings
+        if not text:
+            return Ok("")
+
+        # Inside a list, convert heading to bold text (section commands break lists)
+        if context.list_depth > 0:
+            return Ok(f"\\textbf{{{text}}}")
+
+        cmd = element.style.to_latex_heading_cmd()
         if cmd:
             return Ok(f"\n{cmd}{{{text}}}\n")
 

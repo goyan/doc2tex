@@ -90,6 +90,7 @@ OPERATORS: Final[dict[str, str]] = {
     "−": "-",
     "×": r"\times",
     "÷": r"\div",
+    "∕": "/",  # division slash (U+2215)
     "±": r"\pm",
     "∓": r"\mp",
     "·": r"\cdot",
