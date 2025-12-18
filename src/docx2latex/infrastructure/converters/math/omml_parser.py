@@ -375,7 +375,7 @@ class OmmlParser:
         if lim_loc == "undOvr":
             # Limits above and below (display style)
             if sub_latex:
-                result += rf"_{{​{sub_latex}}}"
+                result += rf"_{{{sub_latex}}}"
             if sup_latex:
                 result += rf"^{{{sup_latex}}}"
         else:
@@ -450,21 +450,32 @@ class OmmlParser:
 
         content = sep_chr.join(contents) if sep_chr else "".join(contents)
 
-        # Map bracket characters to LaTeX
-        bracket_map = {
-            "(": ("(", ")"),
-            "[": ("[", "]"),
-            "{": (r"\{", r"\}"),
-            "|": ("|", "|"),
-            "‖": (r"\|", r"\|"),
-            "⟨": (r"\langle", r"\rangle"),
-            "⌈": (r"\lceil", r"\rceil"),
-            "⌊": (r"\lfloor", r"\rfloor"),
-            "": ("", ""),  # No bracket
+        # Map bracket characters to LaTeX (separate maps for left and right)
+        left_map = {
+            "(": "(",
+            "[": "[",
+            "{": r"\{",
+            "|": "|",
+            "‖": r"\|",
+            "⟨": r"\langle",
+            "⌈": r"\lceil",
+            "⌊": r"\lfloor",
+            "": "",
+        }
+        right_map = {
+            ")": ")",
+            "]": "]",
+            "}": r"\}",
+            "|": "|",
+            "‖": r"\|",
+            "⟩": r"\rangle",
+            "⌉": r"\rceil",
+            "⌋": r"\rfloor",
+            "": "",
         }
 
-        left = bracket_map.get(beg_chr, (beg_chr, ""))[0]
-        right = bracket_map.get(end_chr, ("", end_chr))[1]
+        left = left_map.get(beg_chr, beg_chr)
+        right = right_map.get(end_chr, end_chr)
 
         if left or right:
             return rf"\left{left} {content} \right{right}"

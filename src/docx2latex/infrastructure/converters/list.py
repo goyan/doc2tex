@@ -60,6 +60,10 @@ class ListConverter(BaseConverter[ListBlock]):
         self, list_block: ListBlock, context: ConversionContext
     ) -> str:
         """Convert a list block and its items."""
+        # Skip empty lists (no items)
+        if not list_block.items:
+            return ""
+
         # Choose environment based on list type
         env = list_block.list_type.to_latex_env()
 

@@ -21,6 +21,33 @@ from docx2latex.shared.constants import LATEX_SPECIAL_CHARS
 from docx2latex.shared.logging import get_logger
 from docx2latex.shared.result import Ok, Result
 
+# CJK Unicode ranges
+CJK_RANGES = [
+    (0x4E00, 0x9FFF),    # CJK Unified Ideographs
+    (0x3400, 0x4DBF),    # CJK Unified Ideographs Extension A
+    (0x20000, 0x2A6DF),  # CJK Unified Ideographs Extension B
+    (0x2A700, 0x2B73F),  # CJK Unified Ideographs Extension C
+    (0x2B740, 0x2B81F),  # CJK Unified Ideographs Extension D
+    (0x2B820, 0x2CEAF),  # CJK Unified Ideographs Extension E
+    (0x2CEB0, 0x2EBEF),  # CJK Unified Ideographs Extension F
+    (0x30000, 0x3134F),  # CJK Unified Ideographs Extension G
+    (0xF900, 0xFAFF),    # CJK Compatibility Ideographs
+    (0x3000, 0x303F),    # CJK Symbols and Punctuation
+    (0x3040, 0x309F),    # Hiragana
+    (0x30A0, 0x30FF),    # Katakana
+    (0xAC00, 0xD7AF),    # Hangul Syllables
+]
+
+
+def _contains_cjk(text: str) -> bool:
+    """Check if text contains CJK characters."""
+    for char in text:
+        code_point = ord(char)
+        for start, end in CJK_RANGES:
+            if start <= code_point <= end:
+                return True
+    return False
+
 if TYPE_CHECKING:
     from docx2latex.infrastructure.converters.registry import ConverterRegistry
 
@@ -124,6 +151,10 @@ class ParagraphConverter(BaseConverter[Paragraph]):
         if "\\newpage" in text:
             return "\n\\newpage\n"
 
+        # Check for CJK characters and require CJK package
+        if _contains_cjk(text):
+            context.require_package("CJKutf8")
+
         # Escape LaTeX special characters
         text = self._escape_latex(text)
 
@@ -205,9 +236,11 @@ class ParagraphConverter(BaseConverter[Paragraph]):
         if style.page_break_before:
             parts.append("\\newpage\n")
 
-        # Space before
+        # Space before (line spacing)
         spacing_before = style.to_latex_spacing()
         if spacing_before:
+            # Require setspace package for spacing commands
+            context.require_package("setspace")
             parts.append(spacing_before + "\n")
 
         # Alignment

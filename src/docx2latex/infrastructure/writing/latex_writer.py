@@ -88,8 +88,11 @@ class LatexWriter:
             if context.document:
                 metadata = context.document.metadata.to_latex_metadata()
 
+            # Check if CJK package is required
+            has_cjk = any("{CJKutf8}" in pkg for pkg in context.required_packages)
+
             # Wrap in complete document
-            document = self.wrap_document(content, preamble, metadata)
+            document = self.wrap_document(content, preamble, metadata, has_cjk)
 
             # Write to file
             output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -178,6 +181,7 @@ class LatexWriter:
         content: str,
         preamble: str,
         metadata: dict[str, str] | None = None,
+        has_cjk: bool = False,
     ) -> str:
         """
         Wrap content in a complete LaTeX document.
@@ -186,6 +190,7 @@ class LatexWriter:
             content: Document body content
             preamble: Preamble content
             metadata: Document metadata (title, author, date)
+            has_cjk: Whether the document contains CJK characters
 
         Returns:
             Complete LaTeX document string
@@ -199,8 +204,18 @@ class LatexWriter:
         lines.append("\\begin{document}")
         lines.append("")
 
-        # Add content
-        lines.append(content)
+        # If CJK content, wrap in CJK environment
+        # Note: 'gbsn' (AR PL SungtiL GB) is from the arphic package and supports
+        # Chinese characters. Install with: tlmgr install arphic cjk cjk-fonts
+        if has_cjk:
+            lines.append("\\begin{CJK}{UTF8}{gbsn}")
+            lines.append("")
+            lines.append(content)
+            lines.append("")
+            lines.append("\\end{CJK}")
+        else:
+            # Add content
+            lines.append(content)
         lines.append("")
 
         # End document

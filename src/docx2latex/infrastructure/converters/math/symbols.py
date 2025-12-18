@@ -304,6 +304,15 @@ class SymbolMapper:
         self._map.update(SUPERSCRIPTS)
         self._map.update(SUBSCRIPTS)
 
+    # Invisible characters that should be stripped
+    INVISIBLE_CHARS = {
+        "\u200b",  # Zero-width space
+        "\u200c",  # Zero-width non-joiner
+        "\u200d",  # Zero-width joiner
+        "\u2060",  # Word joiner
+        "\ufeff",  # Zero-width no-break space (BOM)
+    }
+
     def map_char(self, char: str) -> str:
         """
         Map a single character to LaTeX.
@@ -312,8 +321,11 @@ class SymbolMapper:
             char: Unicode character
 
         Returns:
-            LaTeX equivalent or original character
+            LaTeX equivalent or original character, empty string for invisible chars
         """
+        # Strip invisible characters
+        if char in self.INVISIBLE_CHARS:
+            return ""
         return self._map.get(char, char)
 
     def map_text(self, text: str) -> str:
