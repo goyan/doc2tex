@@ -85,6 +85,18 @@ result = service.convert(Path("document.docx"), options)
 | Tables | Full (including merged cells) |
 | Lists | Full (nested) |
 | Images | Full (PNG, JPG, PDF) |
+| CJK characters | Full (Chinese, Japanese, Korean) |
+
+## Compatibility
+
+Tested against Pandoc's DOCX test suite (78 files):
+
+| Metric | Result |
+|--------|--------|
+| Conversion success | 98% (64/65) |
+| Compilation success | 100% (64/64) |
+
+The only conversion failure is a malformed test file with missing `document.xml`.
 
 ## Math Conversion
 
@@ -109,11 +121,26 @@ pip install -e ".[dev]"
 # Run tests
 pytest
 
+# Run Pandoc compatibility tests (requires pdflatex)
+python run_pandoc_tests.py --clean
+
 # Type checking
 mypy src/
 
 # Linting
 ruff check src/
+```
+
+### CJK Support
+
+For Chinese/Japanese/Korean character support, install the TeX Live CJK packages:
+
+```bash
+# macOS/Linux
+sudo tlmgr install collection-langchinese
+
+# Windows (run as Administrator)
+tlmgr install collection-langchinese
 ```
 
 ## Building Executables

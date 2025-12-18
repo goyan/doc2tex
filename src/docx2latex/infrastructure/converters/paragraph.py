@@ -48,6 +48,25 @@ def _contains_cjk(text: str) -> bool:
                 return True
     return False
 
+
+# Private Use Area ranges - these characters from symbol fonts should be filtered
+PUA_RANGES = [
+    (0xE000, 0xF8FF),    # Private Use Area (BMP)
+    (0xF0000, 0xFFFFF),  # Supplementary Private Use Area-A
+    (0x100000, 0x10FFFF), # Supplementary Private Use Area-B
+]
+
+
+def _filter_pua_chars(text: str) -> str:
+    """Remove Private Use Area characters (often from symbol fonts)."""
+    result = []
+    for char in text:
+        code_point = ord(char)
+        is_pua = any(start <= code_point <= end for start, end in PUA_RANGES)
+        if not is_pua:
+            result.append(char)
+    return "".join(result)
+
 if TYPE_CHECKING:
     from docx2latex.infrastructure.converters.registry import ConverterRegistry
 
@@ -150,6 +169,9 @@ class ParagraphConverter(BaseConverter[Paragraph]):
         # Check for page break marker
         if "\\newpage" in text:
             return "\n\\newpage\n"
+
+        # Filter out Private Use Area characters (from symbol fonts)
+        text = _filter_pua_chars(text)
 
         # Check for CJK characters and require CJK package
         if _contains_cjk(text):

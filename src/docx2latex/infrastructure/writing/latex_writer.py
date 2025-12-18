@@ -116,6 +116,9 @@ class LatexWriter:
         """
         lines = []
 
+        # Check if CJK package is required (affects encoding setup)
+        has_cjk = any("{CJKutf8}" in pkg for pkg in context.required_packages)
+
         # Document class
         class_options = [f"{self._font_size}pt", "a4paper"]
 
@@ -130,9 +133,11 @@ class LatexWriter:
         lines.append("")
 
         # Encoding packages
+        # Note: T1 fontenc conflicts with CJK, so we skip it when CJK is used
         lines.append("% Encoding")
         lines.append("\\usepackage[utf8]{inputenc}")
-        lines.append("\\usepackage[T1]{fontenc}")
+        if not has_cjk:
+            lines.append("\\usepackage[T1]{fontenc}")
         lines.append("")
 
         # Geometry if we have layout info
@@ -205,10 +210,10 @@ class LatexWriter:
         lines.append("")
 
         # If CJK content, wrap in CJK environment
-        # Note: 'gbsn' (AR PL SungtiL GB) is from the arphic package and supports
-        # Chinese characters. Install with: tlmgr install arphic cjk cjk-fonts
+        # Note: 'bsmi' (AR PL Mingti2L Big5) is from the arphic package and supports
+        # Chinese characters. Install with: tlmgr install collection-langchinese
         if has_cjk:
-            lines.append("\\begin{CJK}{UTF8}{gbsn}")
+            lines.append("\\begin{CJK}{UTF8}{bsmi}")
             lines.append("")
             lines.append(content)
             lines.append("")
