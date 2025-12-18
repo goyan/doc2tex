@@ -6,6 +6,16 @@ Maps Unicode characters and OMML symbols to LaTeX commands.
 
 from typing import Final
 
+# Mathematical italic variants (Unicode Mathematical Alphanumeric Symbols)
+MATH_ITALIC: Final[dict[str, str]] = {
+    "𝜋": r"\pi",
+    "𝜃": r"\theta",
+    "𝑟": "r",
+    "𝑥": "x",
+    "𝑦": "y",
+    "𝑛": "n",
+}
+
 # Greek letters - lowercase
 GREEK_LOWER: Final[dict[str, str]] = {
     "α": r"\alpha",
@@ -83,6 +93,7 @@ OPERATORS: Final[dict[str, str]] = {
     "±": r"\pm",
     "∓": r"\mp",
     "·": r"\cdot",
+    "∙": r"\cdot",  # bullet operator
     "∗": r"\ast",
     "⋆": r"\star",
     "∘": r"\circ",
@@ -142,6 +153,7 @@ OPERATORS: Final[dict[str, str]] = {
     "⊗": r"\otimes",
     "⊖": r"\ominus",
     "⊘": r"\oslash",
+    "∖": r"\setminus",  # set minus
     # Logic
     "∧": r"\land",
     "∨": r"\lor",
@@ -158,6 +170,7 @@ OPERATORS: Final[dict[str, str]] = {
     "∂": r"\partial",
     "∞": r"\infty",
     "∇": r"\nabla",
+    "∆": r"\Delta",  # increment (U+2206), maps to Delta
     "√": r"\sqrt",
     "∫": r"\int",
     "∬": r"\iint",
@@ -304,6 +317,7 @@ class SymbolMapper:
     def __init__(self) -> None:
         # Combine all mappings
         self._map: dict[str, str] = {}
+        self._map.update(MATH_ITALIC)
         self._map.update(GREEK_LOWER)
         self._map.update(GREEK_UPPER)
         self._map.update(OPERATORS)
@@ -316,6 +330,10 @@ class SymbolMapper:
         "\u200c",  # Zero-width non-joiner
         "\u200d",  # Zero-width joiner
         "\u2060",  # Word joiner
+        "\u2061",  # Function application (invisible)
+        "\u2062",  # Invisible times
+        "\u2063",  # Invisible separator
+        "\u2064",  # Invisible plus
         "\ufeff",  # Zero-width no-break space (BOM)
     }
 
