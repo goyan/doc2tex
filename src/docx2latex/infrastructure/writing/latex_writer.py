@@ -192,26 +192,12 @@ class LatexWriter:
         """
         lines = [preamble]
 
-        # Add metadata commands
-        if metadata:
-            if metadata.get("title"):
-                lines.append(f"\\title{{{metadata['title']}}}")
-            if metadata.get("author"):
-                lines.append(f"\\author{{{metadata['author']}}}")
-            if metadata.get("date"):
-                lines.append(f"\\date{{{metadata['date']}}}")
-            else:
-                lines.append("\\date{}")
-            lines.append("")
+        # Note: We don't add \title, \author, \date, or \maketitle
+        # as these are typically managed manually in the final document
 
         # Begin document
         lines.append("\\begin{document}")
         lines.append("")
-
-        # Add maketitle if we have metadata
-        if metadata and (metadata.get("title") or metadata.get("author")):
-            lines.append("\\maketitle")
-            lines.append("")
 
         # Add content
         lines.append(content)

@@ -91,12 +91,10 @@ class MathConverter(BaseConverter[MathBlock]):
         while "{}" in latex:
             latex = latex.replace("{}", "")
 
-        # Remove redundant braces around single characters
-        # e.g., {x} -> x (but keep {xy} and {\alpha})
+        # Note: We DO NOT remove braces around single characters because
+        # commands like \frac{k}{m} need those braces.
+        # The previous regex was incorrectly transforming \frac{k}{m} to \frackm
         import re
-
-        # Match single alphanumeric in braces (not after backslash)
-        latex = re.sub(r"(?<!\\)\{([a-zA-Z0-9])\}", r"\1", latex)
 
         # Normalize spacing around operators
         latex = re.sub(r"\s+([+\-=])\s+", r" \1 ", latex)

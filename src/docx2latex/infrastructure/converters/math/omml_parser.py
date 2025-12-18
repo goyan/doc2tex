@@ -89,7 +89,44 @@ class OmmlParser:
             result = self._convert_element(child)
             if result:
                 parts.append(result)
-        return "".join(parts)
+        return self._join_with_spacing(parts)
+
+    def _join_with_spacing(self, parts: list[str]) -> str:
+        """Join parts with smart spacing for LaTeX commands.
+
+        Adds space when a LaTeX command ending with a letter
+        is followed by content starting with a letter.
+        """
+        if not parts:
+            return ""
+
+        result = [parts[0]]
+        for i in range(1, len(parts)):
+            prev = parts[i - 1]
+            curr = parts[i]
+
+            # Check if we need a space between prev and curr
+            needs_space = False
+            if prev and curr:
+                # Find last LaTeX command in prev
+                last_backslash = prev.rfind("\\")
+                if last_backslash >= 0:
+                    # Get the command part after backslash
+                    after_backslash = prev[last_backslash + 1:]
+                    # Check if command ends at the string end and ends with letter
+                    if after_backslash and after_backslash[-1].isalpha():
+                        # Check if there's no brace/bracket after the command
+                        # Commands like \frac{} don't need extra space
+                        if not any(c in after_backslash for c in "{}[]"):
+                            # Check if next part starts with letter
+                            if curr and curr[0].isalpha():
+                                needs_space = True
+
+            if needs_space:
+                result.append(" ")
+            result.append(curr)
+
+        return "".join(result)
 
     def _get_element(self, parent: etree._Element, tag: str) -> etree._Element | None:
         """Get child element by tag (without namespace)."""
@@ -145,15 +182,47 @@ class OmmlParser:
                 elif sty_val == "bi" and not style_prefix:
                     style_prefix, style_suffix = r"\boldsymbol{", "}"
 
-        text = self._get_text(elem)
-        text = self._symbols.map_text(text)
+        raw_text = self._get_text(elem)
 
         # Check if this is a function name
-        if self._symbols.is_function_name(text):
-            text = self._symbols.get_function_latex(text)
+        if self._symbols.is_function_name(raw_text):
+            text = self._symbols.get_function_latex(raw_text)
             return f"{style_prefix}{text}{style_suffix}" if style_prefix else text
 
-        return f"{style_prefix}{text}{style_suffix}" if style_prefix else text
+        # For styled text, we need to handle mixed content carefully
+        # e.g., "∈R" with double-struck should become "\in \mathbb{R}", not "\mathbb{∈R}"
+        if style_prefix:
+            return self._apply_style_smartly(raw_text, style_prefix, style_suffix)
+
+        text = self._symbols.map_text(raw_text)
+        return text
+
+    def _apply_style_smartly(self, text: str, prefix: str, suffix: str) -> str:
+        """Apply style only to letters, not to operators.
+
+        This handles cases like "∈R" with double-struck style,
+        which should become "\\in \\mathbb{R}" not "\\mathbb{∈R}".
+        """
+        result = []
+        letter_buffer = []
+
+        def flush_letters() -> None:
+            if letter_buffer:
+                letters = "".join(letter_buffer)
+                result.append(f"{prefix}{letters}{suffix}")
+                letter_buffer.clear()
+
+        for char in text:
+            mapped = self._symbols.map_char(char)
+            # If it's a LaTeX command (starts with \), it's an operator
+            if mapped.startswith("\\") or not char.isalpha():
+                flush_letters()
+                result.append(mapped)
+            else:
+                letter_buffer.append(char)
+
+        flush_letters()
+        return self._join_with_spacing(result) if len(result) > 1 else "".join(result)
 
     def _handle_text(self, elem: etree._Element) -> str:
         """Handle text element (m:t)."""
@@ -442,25 +511,52 @@ class OmmlParser:
         e = self._get_element(elem, "e")
         base = self._process_children(e) if e is not None else ""
 
-        # Map accent characters to LaTeX commands
-        accent_map = {
-            "̂": r"\hat",
-            "̃": r"\tilde",
-            "̄": r"\bar",
-            "̇": r"\dot",
-            "̈": r"\ddot",
-            "⃗": r"\vec",
-            "̆": r"\breve",
-            "̌": r"\check",
-            "̊": r"\mathring",
-            "⏞": r"\overbrace",
-            "⏟": r"\underbrace",
-            "^": r"\hat",
-            "~": r"\tilde",
-            "→": r"\vec",
-        }
+        # Determine if base has multiple characters (for wide accents)
+        # Strip braces and commands to count actual characters
+        base_stripped = base
+        for cmd in [r"\mathit", r"\mathrm", r"\mathbf"]:
+            base_stripped = base_stripped.replace(cmd, "")
+        base_stripped = base_stripped.replace("{", "").replace("}", "")
+        is_multi_char = len(base_stripped) > 1
 
-        accent_cmd = accent_map.get(chr_val, r"\hat")
+        # Map accent characters to LaTeX commands
+        # Use wide versions for multi-character bases
+        if is_multi_char:
+            accent_map = {
+                "̂": r"\widehat",
+                "̃": r"\widetilde",
+                "̄": r"\overline",
+                "̇": r"\dot",
+                "̈": r"\ddot",
+                "⃗": r"\overrightarrow",
+                "̆": r"\breve",
+                "̌": r"\check",
+                "̊": r"\mathring",
+                "⏞": r"\overbrace",
+                "⏟": r"\underbrace",
+                "^": r"\widehat",
+                "~": r"\widetilde",
+                "→": r"\overrightarrow",
+            }
+        else:
+            accent_map = {
+                "̂": r"\hat",
+                "̃": r"\tilde",
+                "̄": r"\bar",
+                "̇": r"\dot",
+                "̈": r"\ddot",
+                "⃗": r"\vec",
+                "̆": r"\breve",
+                "̌": r"\check",
+                "̊": r"\mathring",
+                "⏞": r"\overbrace",
+                "⏟": r"\underbrace",
+                "^": r"\hat",
+                "~": r"\tilde",
+                "→": r"\vec",
+            }
+
+        accent_cmd = accent_map.get(chr_val, r"\widehat" if is_multi_char else r"\hat")
         return rf"{accent_cmd}{{{base}}}"
 
     def _handle_box(self, elem: etree._Element) -> str:

@@ -327,8 +327,16 @@ class SymbolMapper:
             LaTeX equivalent text
         """
         result = []
-        for char in text:
-            result.append(self.map_char(char))
+        for i, char in enumerate(text):
+            mapped = self.map_char(char)
+            result.append(mapped)
+
+            # Add space after LaTeX commands ending with letter if followed by letter
+            # e.g., \times followed by P should become \times P, not \timesP
+            if (mapped.startswith("\\") and mapped[-1].isalpha()
+                    and i + 1 < len(text) and text[i + 1].isalpha()):
+                result.append(" ")
+
         return "".join(result)
 
     def is_function_name(self, name: str) -> bool:

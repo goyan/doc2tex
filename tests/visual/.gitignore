@@ -1,0 +1,6 @@
+# Visual test outputs (generated, not committed)
+outputs/
+diffs/
+
+# Keep baselines (reference images for comparison)
+# baselines/

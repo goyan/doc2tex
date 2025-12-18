@@ -42,6 +42,9 @@ dev = [
 build = [
     "pyinstaller>=6.0",
 ]
+visual = [
+    "pymupdf>=1.24",
+]
 
 [project.scripts]
 docx2latex = "docx2latex.presentation.cli:main"

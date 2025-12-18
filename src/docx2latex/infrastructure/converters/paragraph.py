@@ -109,8 +109,8 @@ class ParagraphConverter(BaseConverter[Paragraph]):
         if cmd:
             return Ok(f"\n{cmd}{{{text}}}\n")
 
-        # Fallback if no command determined
-        return Ok(f"\n\\section{{{text}}}\n")
+        # Fallback if no command determined (use starred to avoid numbering)
+        return Ok(f"\n\\section*{{{text}}}\n")
 
     def _convert_run(self, run: Run, context: ConversionContext) -> str:
         """Convert a text run with formatting."""

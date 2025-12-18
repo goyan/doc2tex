@@ -31,23 +31,7 @@
     urlcolor=cyan,
 }
 
-{% if title %}
-\title{{ '{' }}{{ title }}{{ '}' }}
-{% endif %}
-{% if author %}
-\author{{ '{' }}{{ author }}{{ '}' }}
-{% endif %}
-{% if date %}
-\date{{ '{' }}{{ date }}{{ '}' }}
-{% else %}
-\date{}
-{% endif %}
-
 \begin{document}
-
-{% if title or author %}
-\maketitle
-{% endif %}
 
 {{ content }}
 

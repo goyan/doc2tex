@@ -293,13 +293,14 @@ class ParagraphStyle:
         if level is None:
             return None
 
+        # Use starred versions to avoid automatic numbering
         commands = {
-            1: r"\section",
-            2: r"\subsection",
-            3: r"\subsubsection",
-            4: r"\paragraph",
-            5: r"\subparagraph",
-            6: r"\subparagraph",  # LaTeX only goes to 5 levels
+            1: r"\section*",
+            2: r"\subsection*",
+            3: r"\subsubsection*",
+            4: r"\paragraph*",
+            5: r"\subparagraph*",
+            6: r"\subparagraph*",  # LaTeX only goes to 5 levels
         }
         return commands.get(level)
 
