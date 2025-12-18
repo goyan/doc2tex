@@ -1,0 +1,55 @@
+{% raw %}
+\documentclass[{{ font_size }}pt, {{ paper_size }}]{article}
+
+% Encoding
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+{% if geometry %}
+% Page layout
+\usepackage[{{ geometry }}]{geometry}
+{% endif %}
+
+% Math packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+
+{% if packages %}
+% Additional packages
+{% for pkg in packages %}
+\usepackage{{ pkg }}
+{% endfor %}
+{% endif %}
+
+% Hyperref setup
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+}
+
+{% if title %}
+\title{{ '{' }}{{ title }}{{ '}' }}
+{% endif %}
+{% if author %}
+\author{{ '{' }}{{ author }}{{ '}' }}
+{% endif %}
+{% if date %}
+\date{{ '{' }}{{ date }}{{ '}' }}
+{% else %}
+\date{}
+{% endif %}
+
+\begin{document}
+
+{% if title or author %}
+\maketitle
+{% endif %}
+
+{{ content }}
+
+\end{document}
+{% endraw %}

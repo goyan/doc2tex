@@ -1,0 +1,120 @@
+[project]
+name = "docx2latex"
+version = "1.0.0"
+description = "High-quality DOCX to LaTeX converter with excellent math formula support"
+authors = [{ name = "docx2latex", email = "docx2latex@example.com" }]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Text Processing :: Markup :: LaTeX",
+    "Typing :: Typed",
+]
+dependencies = [
+    "lxml>=5.0",
+    "python-docx>=1.1",
+    "Pillow>=10.0",
+    "typer>=0.12",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "rich>=13.0",
+    "Jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.4",
+    "mypy>=1.10",
+    "lxml-stubs>=0.5",
+    "types-Pillow>=10.0",
+]
+build = [
+    "pyinstaller>=6.0",
+]
+
+[project.scripts]
+docx2latex = "docx2latex.presentation.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/docx2latex"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "A",      # flake8-builtins
+    "C4",     # flake8-comprehensions
+    "PT",     # flake8-pytest-style
+    "RUF",    # ruff-specific
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "ARG",    # flake8-unused-arguments
+    "PTH",    # flake8-use-pathlib
+]
+ignore = [
+    "A003",   # shadow builtin (id, type, etc.)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["docx2latex"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_configs = true
+show_error_codes = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["docx.*", "lxml.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q --cov=src/docx2latex --cov-report=term-missing"
+pythonpath = ["src"]
+
+[tool.coverage.run]
+source = ["src/docx2latex"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "@abstractmethod",
+]
