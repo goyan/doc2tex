@@ -70,6 +70,12 @@ GREEK_UPPER: Final[dict[str, str]] = {
 
 # Mathematical operators
 OPERATORS: Final[dict[str, str]] = {
+    # Special characters that need escaping
+    "%": r"\%",
+    "#": r"\#",
+    "&": r"\&",
+    "$": r"\$",
+    "_": r"\_",
     # Basic arithmetic
     "−": "-",
     "×": r"\times",

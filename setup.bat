@@ -6,7 +6,7 @@ echo Activating virtual environment...
 call venv\Scripts\activate.bat
 
 echo Installing dependencies...
-pip install -e ".[dev]"
+pip install -e ".[all]"
 
 echo.
 echo Setup complete! Virtual environment is active.

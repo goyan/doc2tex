@@ -137,8 +137,12 @@ The converter supports comprehensive math formula conversion:
 # Run tests
 python -m pytest
 
-# Run Pandoc compatibility tests (requires pdflatex)
-python run_pandoc_tests.py --clean
+# Run visual tests (requires pdflatex + pymupdf)
+pip install -e ".[visual]"
+python -m pytest tests/visual/
+
+# Update visual baselines after intentional changes
+python -m pytest tests/visual/ --update-baselines
 
 # Type checking
 python -m mypy src/

@@ -8,7 +8,7 @@ echo "Activating virtual environment..."
 source venv/bin/activate
 
 echo "Installing dependencies..."
-pip install -e ".[dev]"
+pip install -e ".[all]"
 
 echo ""
 echo "Setup complete! Virtual environment is active."
