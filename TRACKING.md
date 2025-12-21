@@ -246,3 +246,64 @@ python -m pytest
 # Build executable
 python scripts/build.py
 ```
+
+---
+
+## Known Issues & Technical Debt
+
+### Bugs
+
+| Issue | File | Line | Severity | Description |
+|-------|------|------|----------|-------------|
+| `locals()` assignment bug | `docx_parser.py` | 685 | Medium | `locals()[var_name] = int(val)` doesn't modify local variables as intended. Page margins may not be parsed correctly. |
+| Silent error handling | `omml_parser.py` | 41-43 | Low | OMML parse errors return empty string silently. Should return `Result` type for better error handling. |
+| Type annotation error | `docx_parser.py` | 61 | Medium | `_numbering: dict[str, dict[str, dict]]` missing inner type. Causes cascading mypy errors. |
+| Wrong dict type | `docx_parser.py` | 149 | Medium | `_relationships` stores `dict[str, str]` but typed as `str`. Causes `.get()` errors on lines 511, 707, 708. |
+
+### Code Quality (Ruff - 140 errors)
+
+| Category | Count | Auto-fixable |
+|----------|-------|--------------|
+| TC001/TC003 - Imports in TYPE_CHECKING | ~80 | Yes (unsafe) |
+| RUF022 - Unsorted `__all__` | 5 | Yes |
+| I001 - Unsorted imports | 10 | Yes |
+| F401 - Unused imports | 5 | Yes |
+| ARG002 - Unused arguments | 6 | No (by design in Result class) |
+| SIM115 - Context manager suggestions | ~15 | No |
+| RET504 - Unnecessary variable assignments | ~10 | Yes |
+| B007 - Unused loop variables | ~5 | Yes |
+
+### Type Errors (Mypy - 28 errors)
+
+| File | Errors | Description |
+|------|--------|-------------|
+| `docx_parser.py` | 15 | ZipFile None checks, dict type issues |
+| `paragraph.py` | 2 | Result type mismatch on line 133-135 |
+| `registry.py` | 3 | Missing generic type parameters |
+| `latex_writer.py` | 1 | None assignment to Environment |
+| `result.py` | 1 | TypeVar usage issue |
+| `style_resolver.py` | 1 | Optional str passed to dict.get() |
+| `converter.py` | 1 | Invariant TypeVar in protocol |
+| `omml_parser.py` | 1 | Missing type annotation for list |
+
+### Potential Improvements
+
+| Improvement | Priority | Description |
+|-------------|----------|-------------|
+| Fix ruff errors | Medium | Run `ruff check --fix src/` for 30 auto-fixable errors |
+| Fix mypy errors | High | Fix type annotations in docx_parser.py |
+| Increase test coverage | Low | Current: 63%, target: 80%+ |
+| Add progress callback | Low | For GUI/API integration with large documents |
+| Optimize handler dict | Low | Make OMML handlers a class-level constant instead of per-call |
+
+### Commands to Run
+
+```bash
+# Auto-fix ruff errors
+ruff check --fix src/
+
+# Check remaining issues
+ruff check src/
+python -m mypy src/
+python -m pytest --cov=src/docx2latex
+```
